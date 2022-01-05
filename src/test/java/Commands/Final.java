@@ -59,6 +59,7 @@ public class Final {
     private WebDriver driver;
     private JavascriptExecutor js;
 
+
     public void init() {
         WebDriverManager.chromedriver().setup();
         chrome = new ChromeOptions();
@@ -66,18 +67,23 @@ public class Final {
         js = (JavascriptExecutor) driver;
     }
 
-    public void registration() {
-        RestAssured.baseURI = "https://bookstore.toolsqa.com/Account/v1/User";
+    public ResponseBody registration(String link) {
+
+        RestAssured.baseURI = link;
         RequestSpecification request = given().header("Content-type", "application/json");
         JSONObject requestParams = new JSONObject();
         requestParams.put("userName", "Virrrr"); // Cast
         requestParams.put("password", "Sin1ggggg23!");
         request.body(requestParams.toJSONString());
-        Response response = request.post("https://bookstore.toolsqa.com/Account/v1/User");
-        ResponseBody body = response.getBody();
-        System.out.println(body.jsonPath().toString());
+        Response response = request.post(link);
+        return response.getBody();
+
+//        response.print();
+
+//        String responseBody = response.getBody().asString();
         // Deserialize the Response body into RegistrationSuccessResponse
     }
+
 
     public void login() {
         driver.manage().window().maximize();
@@ -96,7 +102,7 @@ public class Final {
     public void task1() throws InterruptedException {
 
         init();
-        registration();
+        registration("https://bookstore.toolsqa.com/Account/v1/User");
         login();
 
         js.executeScript("window.scrollBy(0,300)", "");
@@ -120,6 +126,9 @@ public class Final {
         if (actualMsg.contains(errorMsg)) {
             System.out.println("Test Case Passed");
         }
+        ResponseBody body = registration("https://bookstore.toolsqa.com/Account/v1/Authorized");
+//        Assert.assertEquals("User not found!",body.asString());
+        assert body.asString().contains("User not found!");
 
     }
 }
